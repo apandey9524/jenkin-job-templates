@@ -1,0 +1,109 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>app_version</name>
+          <description></description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.9.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>--GITREPO--</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/--GITBRANCHNAME--</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.29.0">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>dotnet build -c Release &quot;--TARGETFILEPATH--&quot;|grep succeeded</command>
+	  <unstableReturn>1</unstableReturn>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.postbuildtask.PostbuildTask plugin="postbuild-task@1.8">
+      <tasks>
+        <hudson.plugins.postbuildtask.TaskProperties>
+          <logTexts>
+            <hudson.plugins.postbuildtask.LogProperties>
+              <logText>build</logText>
+              <operator>AND</operator>
+            </hudson.plugins.postbuildtask.LogProperties>
+          </logTexts>
+          <EscalateStatus>false</EscalateStatus>
+          <RunIfJobSuccessful>true</RunIfJobSuccessful>
+          <script>mkdir /var/lib/jenkins/jobs/$JOB_NAME/builds/$BUILD_NUMBER/archive&#xd;
+artifactarchivename=&quot;artifacts$app_version.tar.gz&quot;&#xd;
+tar  cvzf &quot;$artifactarchivename&quot;  project/bin/Release/netcoreapp2.0 &#xd;
+ls -a&#xd;
+mv &quot;$artifactarchivename&quot; /var/lib/jenkins/jobs/$JOB_NAME/builds/$BUILD_NUMBER/archive&#xd;
+ls -a /var/lib/jenkins/jobs/$JOB_NAME/builds/$BUILD_NUMBER/archive&#xd;
+&#xd;
+#cp -p app_artifacts.tar.gz #/var/lib/jenkins/jobs/dotnetcore_app/builds/lastSuccessfulBuild/archive&#xd;
+&#xd;
+&#xd;
+#tar cvzf -f &quot;$artifactarchivename&quot; project/bin/Release/netcoreapp2.0&#xd;
+&#xd;
+#tar cvzf -f &quot;$artifactarchivename.tar.gz&quot; project/bin/Release/netcoreapp2.0&#xd;
+#-C /var/lib/jenkins/jobs/dotnetcore_app/builds/lastSuccessfulBuild/archive&#xd;
+#mv -f $artifactarchivename  #/var/lib/jenkins/jobs/dotnetcore_app/builds/lastSuccessfulBuild/archive&#xd;
+&#xd;
+&#xd;
+</script>
+        </hudson.plugins.postbuildtask.TaskProperties>
+      </tasks>
+    </hudson.plugins.postbuildtask.PostbuildTask>
+    <hudson.tasks.Mailer plugin="mailer@1.21">
+      <recipients>apandey@tavisca.com dsingh@tavisca.com vtripathi@tavisca dghogare@tavisca.com vbhumare@tavisca.com$
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.35.2">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs class="empty-list"/>
+          <projects>pushtos3, </projects>
+          <condition>SUCCESS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+          <triggerFromChildProjects>false</triggerFromChildProjects>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers/>
+</project>
