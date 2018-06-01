@@ -27,12 +27,12 @@
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>--GITREPO--</url>
+        <url>https://github.com/nagarwal28/Assignments.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
       <hudson.plugins.git.BranchSpec>
-        <name>*/--GITBRANCHNAME--</name>
+        <name>*/core</name>
       </hudson.plugins.git.BranchSpec>
     </branches>
     <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
@@ -51,7 +51,7 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>dotnet build -c Release &quot;--TARGETFILEPATH--&quot;|grep succeeded</command>
+      <command>dotnet build -c Release &quot;project/project.csproj&quot;|grep succeeded</command>
 	  <unstableReturn>1</unstableReturn>
     </hudson.tasks.Shell>
   </builders>
